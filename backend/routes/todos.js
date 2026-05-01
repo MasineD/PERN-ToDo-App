@@ -8,6 +8,9 @@ const router = Router();    //Creating a router object
 router.post("/", async (req,res)=>{     //Make the operation non-blocking with the async word
     try{
         const { description, completed } = req.body;        //Destructuring a TODO's details from the client
+        if(!description){
+            return res.status(400).json({msg: "Description is required to create a task"});
+        }
         const newToDo =  await pool.query(      //Talking to the database, and creating a new task
             "INSERT INTO ToDo (description, completed) VALUES ($1, $2) RETURNING *",        //$1 and $2 are parameterised queries, preventing SQL injection attacks. Returning * allows sending the responses back to the frontend
             [description, completed || false]
@@ -35,9 +38,12 @@ router.put("/:id", async(req,res)=>{
     try{
         const { id } = req.params;
         const { description, completed } = req.body;
+        if(!description && completed === undefined){
+            return res.status(400).json({msg: "Please provide a description or completed status to update the task"});
+        }
         const updateTodo =  await pool.query(
             "UPDATE ToDo SET description = $1, completed = $2 WHERE id = $3 RETURNING *",
-            [description, completed, id]
+            [description, completed || false, id]
         );
         if(updateTodo.rows.length === 0){
             return res.status(404).json({msg: "Task not found"});
@@ -53,11 +59,14 @@ router.put("/:id", async(req,res)=>{
 router.delete("/:id", async(req,res)=>{
     try{
         const { id } = req.params;
-        await pool.query(
-            "DELETE FROM ToDo WHERE id = $1",
+        const deleteResult = await pool.query(
+            "DELETE FROM ToDo WHERE id = $1 RETURNING *",
             [id]
         );
-        res.json("Task successfully deleted");
+        if (deleteResult.rows.length === 0) {
+            return res.status(404).json({msg: "Task not found"});
+        }
+        res.json({ message: "Task successfully deleted", todo: deleteResult.rows[0] });
     }
     catch(err){
         console.error(err.message);
