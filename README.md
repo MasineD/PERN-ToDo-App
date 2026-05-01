@@ -3,7 +3,7 @@ Creating a full stack ToDo application using PostgreSQL, Express.js, React.js, a
 
 ## Introduction
 This is specifically for learning purposes. I was learning how to build a full stack application using the PERN (PostgreSQL, Express.js, React.js, and Node.js) stack.
-Click on the image for a video of how the application works [![Project Overview](/images/landingPage.png)](__)]
+Click on the image for a video of how the application works [![Project Overview](/images/landingPage.png)](__)
 
 ## Project Status
 COMPLETE
